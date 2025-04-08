@@ -4,6 +4,7 @@ import SearchForm from './components/SearchForm';
 import './App.css';
 import axios from 'axios';
 import VisualizarTiempos from './components/VisualizarTiempos';
+import ContadorResultados from './components/ContadorResultados'; // 👈 Nuevo componente
 
 function App() {
   const [timeAxios, setTimeAxios] = useState(parseFloat(localStorage.getItem('axiosTime') ?? 0));
@@ -13,6 +14,7 @@ function App() {
   const [country, setCountry] = useState('US');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingType, setLoadingType] = useState('');
+  const [mostrarContador, setMostrarContador] = useState(false); // 👈 Estado nuevo
 
   const url = `https://randomuser.me/api/?results=12&gender=${gender}&nat=${country}`;
 
@@ -30,7 +32,7 @@ function App() {
     } finally {
       setTimeout(() => setIsLoading(false), 500);
     }
-  }, [gender, country, isLoading, url]);
+  }, [isLoading, url]);
 
   const findPeopleFetch = useCallback(async () => {
     if (isLoading) return;
@@ -48,7 +50,7 @@ function App() {
     } finally {
       setTimeout(() => setIsLoading(false), 500);
     }
-  }, [gender, country, isLoading, url]);
+  }, [isLoading, url]);
 
   const compareRequests = useCallback(async () => {
     if (isLoading) return;
@@ -83,10 +85,11 @@ function App() {
     } finally {
       setTimeout(() => setIsLoading(false), 500);
     }
-  }, [gender, country, isLoading, url]);
+  }, [isLoading, url]);
 
   const handleGender = (event) => setGender(event.target.value);
   const handleCountry = (event) => setCountry(event.target.value);
+  const toggleContador = () => setMostrarContador(prev => !prev); // 👈 Toggle botón
 
   return (
     <div className="App">
@@ -102,7 +105,15 @@ function App() {
         <button onClick={compareRequests} disabled={isLoading} className="btn">
           {isLoading && loadingType === 'compare' ? "Cargando..." : "Comparar Axios vs Fetch"}
         </button>
+        <button onClick={toggleContador} className="btn" data-testid="toggle-contador">
+          {mostrarContador ? "Ocultar Contador" : "Mostrar Contador"}
+        </button>
       </div>
+
+      {mostrarContador && (
+        <ContadorResultados axiosCount={people.axios.length} fetchCount={people.fetch.length} />
+      )}
+
       <VisualizarTiempos timeAxios={timeAxios} timeFetch={timeFetch} />
       <div className="App-results">
         <div className="result-section">
